@@ -1,0 +1,90 @@
+<html>
+    <head>
+        <title>Prova Auto Scrittura JS</title>
+        <link href="https://fonts.googleapis.com/css?family=Titillium+Web&display=swap" rel="stylesheet">
+    </head>
+    <style>
+        body > div{
+            width:100%; 
+            height:100%; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+        }
+        #cursor{
+            padding-left: 10px; 
+            border-right: 3px solid black;
+            content: "";
+            animation: cursor 1s infinite;
+        }
+        p{
+            white-space: break-spaces;
+            text-align: center;
+            font-family: 'Titillium Web', sans-serif;
+            font-size: 50px;
+        }
+        @keyframes cursor {
+            0%   {opacity: 0;}
+            50%  {opacity: 1;}
+            100%  {opacity: 0;}
+        }
+    </style>
+    <body>
+        <div>
+            <p><span id="context"></span><span id="cursor"></span></p>
+        </div>
+        <script>
+            
+
+            class Content{
+                constructor(elements, context, transitionTime=100, pauseTime=3000){
+                    this.elements = elements;
+                    this.curElement = 0;
+                    this.transitionTime = transitionTime;
+                    this.pauseTime = pauseTime;
+                    this.phase = 0;
+                    this.context = context;
+                }
+                next(){
+                    let contentText = this.context.innerHTML;
+                    let time = this.transitionTime / this.elements[this.curElement].length
+                    switch(this.phase){
+                        case 0:
+                            this.context.innerHTML = this.elements[this.curElement].substr(0, this.context.innerHTML.length+1);
+                            if(this.elements[this.curElement].length == contentText.length) this.phase = 1;
+                            return time;
+                        case 1: 
+                            this.phase = 2;
+                            return this.pauseTime;
+                        case 2: 
+                            this.context.innerHTML = this.elements[this.curElement].substr(0, this.context.innerHTML.length-1);
+                            if(contentText.length==0) {
+                                this.curElement=(this.curElement+1)%this.elements.length;
+                                this.phase = 0;
+                            }
+                            return time;
+                    }
+                }
+                start(){
+                    let time = this.next();
+                    setTimeout(this.goNext(this),time);
+                }
+                goNext(myEl){
+                    let time = myEl.next();
+                    setTimeout(function(){myEl.goNext(myEl)},time);
+                }
+            }
+            (function(){
+                var context= document.getElementById('context');
+                var myContent = new Content([
+                    'First Text',
+                    'Second Text',
+                    'Third Text',
+                    `Very ${'very '.repeat(10)}long text`
+                ], context, 1000, 3000);
+                myContent.start();
+            })();
+
+        </script>
+    </body>
+</html>
